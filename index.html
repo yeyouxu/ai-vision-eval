@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文生图模型能力评测 · Midjourney / Seedream / Kling 两维度正式评测</title>
+<meta name="description" content="以 Midjourney、Seedream、Kling 三个主流模型为对象，通过 82 道跨场景题目，从风景美学、叙事感女性人像美学两个正式维度系统评测文生图模型的能力边界。">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="index">
+
+<nav class="nav"><div class="nav-inner">
+  <a class="nav-brand" href="index.html">文生图模型能力评测<small>TEXT-TO-IMAGE MODEL EVALUATION</small></a>
+  <div class="nav-links">
+    <a href="index.html" class="active">首页</a>
+    <a href="report.html">评测报告</a>
+    <a href="gallery.html">对比画廊</a>
+    <a href="data.html">数据附录</a>
+    <a href="code.html">分析代码</a>
+  </div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="hero-eyebrow">Model Evaluation · 2026.09</div>
+  <h1>当模型从「生成正确」<br>走向「生成真实与美」</h1>
+  <p class="sub">以 Midjourney V8.2 / Seedream 5.0 Pro / Kling Image 3.0 为对象，通过 82 道跨场景题目，
+    从<strong>风景美学、叙事感女性人像美学</strong>两个正式维度，系统性刻画当前文生图模型的能力边界。
+    另设「通用能力」先导研究用于验证评测方法（详见报告第三章）。</p>
+  <div class="hero-meta">
+    <span><b>评测对象</b> Midjourney · Seedream · Kling</span>
+    <span><b>题目规模</b> 82 题 / 2 个正式专项 + 1 个方法论验证</span>
+    <span><b>方法</b> 先导研究—正式研究两阶段设计</span>
+    <span><b>评测人</b> Lyra</span>
+  </div>
+  <div class="hero-actions">
+    <a class="btn btn-primary" href="report.html">阅读完整报告</a>
+    <a class="btn btn-ghost" href="gallery.html">看模型对比画廊</a>
+    <a class="btn btn-ghost" href="assets/文生图模型能力评测报告-详细版.pdf">下载 PDF 版</a>
+  </div>
+</div></header>
+
+<main class="wrap page">
+
+  <!-- 关键数字 -->
+  <div class="stats-band">
+    <div class="cell"><div class="num">3</div><div class="lbl">评测模型</div></div>
+    <div class="cell"><div class="num">82</div><div class="lbl">评测题目</div></div>
+    <div class="cell"><div class="num">2</div><div class="lbl">正式评测专项</div></div>
+    <div class="cell"><div class="num">2</div><div class="lbl">研究阶段</div></div>
+    <div class="cell"><div class="num">249</div><div class="lbl">生成图片样本</div></div>
+    <div class="cell"><div class="num">27</div><div class="lbl">评分维度（合计）</div></div>
+  </div>
+
+  <!-- 核心结论 -->
+  <section class="section">
+    <h2 class="section-title">核心结论：三个模型，三种能力画像</h2>
+    <p class="section-desc">三个模型的能力差异呈结构性分化——不存在「全面最强」的模型，
+      只有在「准确度」与「美学质量」两个相对独立的维度上，各自不同的取舍。</p>
+    <div class="model-grid">
+      <div class="model-card mj">
+        <h3>Midjourney <span style="font-size:14px;color:var(--ink-faint)">V8.2</span></h3>
+        <div class="ver">Midjourney Inc. · 网页版 · RAW 模式 / 风格化 100 / HD</div>
+        <span class="tag">美感强 · 执行弱</span>
+        <p>画面氛围和摄影质感最强，人像的色彩、光影质量、服装造型美学全面领先；
+          但准确执行明显偏弱——风景专业风格契合度仅 20.0%，人像景别准确率仅 48.3%，
+          文化合理性对中国传统节日与东方艺术的理解仍停留在符号层面。</p>
+        <div class="kv">
+          <span><b>最强项</b> 美学质量（风景光线/景深 5.00 满分）</span>
+          <span><b>最弱项</b> 风格指令执行（20.0%）与景别控制（48.3%）</span>
+        </div>
+      </div>
+      <div class="model-card sd">
+        <h3>Seedream <span style="font-size:14px;color:var(--ink-faint)">5.0 Pro</span></h3>
+        <div class="ver">字节跳动 · 网页版 · 2K 输出</div>
+        <span class="tag">均衡 · 可靠</span>
+        <p>当前三个模型中最接近「技术正确」的一个：准确执行能��最强，
+          风景九个准确度维度零失败，美学表现中上、无明显短板；
+          但尚未形成显著的美学风格优势，人像服装造型美感偏弱。</p>
+        <div class="kv">
+          <span><b>最强项</b> 准确度（风景全维度 100% 执行成功）</span>
+          <span><b>最弱项</b> 服装与造型美学（3.93）、动态与快门感（3.50）</span>
+        </div>
+      </div>
+      <div class="model-card kl">
+        <h3>Kling Image <span style="font-size:14px;color:var(--ink-faint)">3.0</span></h3>
+        <div class="ver">快手 · 网页版 · 2K 输出</div>
+        <span class="tag">基础尚可 · 质感落后</span>
+        <p>指令遵循和文化合理性尚可，但真实质感出现系统性落后：
+          人像 12 个美学维度中 10 个为三模型最低，皮肤塑料感、服装生硬、环境纹理失真，
+          尚未跨越从「画得对」到「画得真」的能力门槛。</p>
+        <div class="kv">
+          <span><b>最强项</b> 景深/虚化准确率（100%）、文化合理性</span>
+          <span><b>最弱项</b> 皮肤细节/身体结构自然度（2.97，低于及格线）</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 两专项美学质量雷达图 -->
+    <div class="chart-row" style="margin-top:30px">
+      <figure><img src="assets/charts/Landscape - Aesthetic_radar.webp" alt="风景专项美学质量三模型对比雷达图" loading="lazy"><figcaption>风景专项 · 美学质量均分雷达图（1—5 分制）</figcaption></figure>
+      <figure><img src="assets/charts/Portrait - Aesthetic_radar.webp" alt="人像专项美学质量三模型对比雷达图" loading="lazy"><figcaption>人像专项 · 美学质量均分雷达图（1—5 分制）</figcaption></figure>
+    </div>
+  </section>
+
+  <!-- 共性短板 -->
+  <section class="section">
+    <h2 class="section-title">跨专项共性短板</h2>
+    <p class="section-desc">两个正式专项的结果共同指向当前文生图模型三个稳定的能力缺口。</p>
+    <div class="find-list">
+      <div class="find-item"><div class="no">01</div><div>
+        <h4>景别理解不准</h4>
+        <p>「半身 / 全身 / 大景」的边界容易被混淆，人像景别准确度三模型最高仅 62.1%，
+          Midjourney 低至 48.3%——超过一半的题目未按要求取景，是当前最普遍的执行短板。</p>
+      </div></div>
+      <div class="find-item"><div class="no">02</div><div>
+        <h4>光位理解与执行不稳</h4>
+        <p>逆光、侧光、侧逆光常被混淆，人像自然光还原度三模型集中在 66.7%—70.0%，均未突破 70%。
+          光效表述明确化后问题依旧，说明短板源于模型光位理解能力，而非提示词表述。</p>
+      </div></div>
+      <div class="find-item"><div class="no">03</div><div>
+        <h4>东方风格与文化理解分化</h4>
+        <p>Midjourney 将春节生成为符号堆砌，Kling 将水墨画泛化为「墨线勾边 + 彩块填充」的工笔彩绘，
+          均未触及东方美学核心；Seedream 在同类题目上表现相对最稳。</p>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- 方法论 -->
+  <section class="section">
+    <h2 class="section-title">方法论设计</h2>
+    <p class="section-desc">本评测不仅给出模型对比结果，更形成了一套可复用的评测框架。</p>
+    <div class="find-list">
+      <div class="find-item"><div class="no">◆</div><div>
+        <h4>两阶段设计：先导研究 — 正式研究</h4>
+        <p>通用能力作为先导研究，承担维度验证与问题识别功能；写实风格约束缺失、
+          光效词汇歧义等问题在先导阶段被发现，并在正式研究中完成修正——评测方法本身具有演进性。</p>
+      </div></div>
+      <div class="find-item"><div class="no">◆</div><div>
+        <h4>「显性指令符合度 / 美学质量」双层评分</h4>
+        <p>把「对不对」与「好不好」拆成两个独立层面：准确度仅在提示词明确涉及要素时激活（1/0 分制），
+          美学质量独立评分（1—5 分制），避免了因美感高��掩盖执行弱、或因执行准而忽略美感不足。</p>
+      </div></div>
+      <div class="find-item"><div class="no">◆</div><div>
+        <h4>评分锚点 + 归因分析，全程可追溯</h4>
+        <p>各维度配有明确评分锚点与分数段描述，低分案例逐一归因——区分提示词设计缺陷、
+          模型能力短板与训练数据偏差，并给出可落地的改进方向。</p>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- 入口 -->
+  <section class="section">
+    <h2 class="section-title">深入这个项目</h2>
+    <p class="section-desc">报告全文、逐题评分数据、三模型同题对比图、统计分析代码，全部开放。</p>
+    <div class="entry-grid">
+      <a class="entry-card" href="report.html">
+        <div class="icon">📄</div>
+        <h4>评测报告</h4>
+        <p>七章完整报告：背景与目标、评测设计、两个正式专项结果、Bad Case 归因、结论与适用边界、改进方向。</p>
+      </a>
+      <a class="entry-card" href="gallery.html">
+        <div class="icon">🖼️</div>
+        <h4>对比画廊</h4>
+        <p>82 道题、249 张生成图：同一提示词下 Midjourney / Seedream / Kling 三模型并排对比。</p>
+      </a>
+      <a class="entry-card" href="data.html">
+        <div class="icon">📊</div>
+        <h4>数据附录</h4>
+        <p>评测方法、完整题库、逐题评分与 Bad Case 记录、均分统计——附录 1-1 至 3-4 全部表格。</p>
+      </a>
+      <a class="entry-card" href="code.html">
+        <div class="icon">💻</div>
+        <h4>分析代码</h4>
+        <p>Python / pandas 数据清洗与统计、matplotlib 可视化：从原始评分表到图表的完整流程。</p>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer"><div class="wrap">
+  <div class="row">
+    <span>文生图模型能力评测 · 2026 年 9 月 · 评测人 L</span>
+  </div>
+  <div class="row">
+    <a href="assets/文生图模型能力评测报告-详细版.pdf">下载详细版 PDF</a>
+    <a href="assets/文生图模型能力评测报告-精简版.pdf">下载精简版 PDF</a>
+    <a href="https://github.com/yeyouxu" target="_blank" rel="noopener">作者 GitHub ↗</a>
+  </div>
+  <div class="row"><span>本报告结论基于评测时的模型版本与方法，是一次阶段性观察。</span></div>
+</div></footer>
+
+</body>
+</html>

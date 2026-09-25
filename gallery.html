@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>对比画廊 · 文生图模型能力评测</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="gallery">
+
+<nav class="nav"><div class="nav-inner">
+  <a class="nav-brand" href="index.html">文生图模型能力评测<small>TEXT-TO-IMAGE MODEL EVALUATION</small></a>
+  <div class="nav-links">
+    <a href="index.html">首页</a>
+    <a href="report.html">评测报告</a>
+    <a href="gallery.html" class="active">对比画廊</a>
+    <a href="data.html">数据附录</a>
+    <a href="code.html">分析代码</a>
+  </div>
+</div></nav>
+
+<main class="wrap page">
+  <h1 style="font-size:30px;margin-bottom:8px">对比画廊</h1>
+  <p style="color:var(--ink-soft);max-width:760px;margin-bottom:28px">
+    82 道题、249 张生成图。同一提示词下，Midjourney / Seedream / Kling 三模型并排对比——
+    Seedream 与 Kling 使用中文提示词，Midjourney 使用英文提示词；各模型生成多张后选最优一张进入评分（16:9 画幅）。
+    点击图片可放大。展示为每题进入评分的最优样本，全量 830 张生成图见仓库。
+  </p>
+
+  <div class="gallery-tabs" id="tabs">
+    <button data-sec="general">通用能力 · 先导研究（G-01—G-25，含 12A/12B）</button>
+    <button data-sec="landscape">风景美学 · 正式研究（27 题）</button>
+    <button data-sec="portrait" class="on">叙事感女性人像 · 正式研究（30 题）</button>
+  </div>
+
+  <div id="gallery"></div>
+</main>
+
+<div class="lightbox" id="lightbox">
+  <img id="lightbox-img" alt="">
+  <div class="lightbox-meta" id="lightbox-meta"></div>
+  <span class="lightbox-hint">建议放大至 100% 检查皮肤、纹理细节后评分</span>
+</div>
+
+<footer class="footer"><div class="wrap">
+  <div class="row"><span>文生图模型能力评测 · 2026 年 9 月 · 评测人 L</span></div>
+</div></footer>
+
+<script>
+(function () {
+  var ORDER = ['Midjourney', 'Seedream', 'Kling'];
+  var SEC_NAME = { general: 'G', landscape: 'L', portrait: 'P' };
+  var gallery = document.getElementById('gallery');
+  var lightbox = document.getElementById('lightbox');
+  var lightboxImg = document.getElementById('lightbox-img');
+  var lightboxMeta = document.getElementById('lightbox-meta');
+  var manifest = null;
+
+  function closeLightbox() { lightbox.classList.remove('show'); }
+
+  lightbox.addEventListener('click', function (e) {
+    // 仅在点击背景或图片本身时关闭；点击 meta/hint 不关闭
+    if (e.target === lightbox || e.target === lightboxImg) closeLightbox();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeLightbox();
+  });
+
+  function qNum(id) {
+    var m = id.match(/^[GLP]-(\d+)([AB])?(?:-(\d+))?/);
+    if (!m) return 9999;
+    var v = parseInt(m[1], 10) * 100 + (m[3] ? parseInt(m[3], 10) : 0);
+    if (m[2]) v += (m[2] === 'A' ? 0.1 : 0.2);   // G-12A / G-12B 子题排序
+    return v;
+  }
+
+  // 把 manifest 里的 src 拆成 thumb 与 full 两份
+  function thumbOf(src) { return src.replace('/img/', '/img/thumb/'); }
+
+  function render(sec) {
+    var qs = manifest[sec];
+    var ids = Object.keys(qs).sort(function (a, b) { return qNum(a) - qNum(b); });
+    var html = '';
+    ids.forEach(function (id) {
+      var q = qs[id];
+      html += '<div class="q-card"><div class="q-head">' +
+        '<span class="q-id">' + id + '</span>' +
+        '<span class="q-prompt">' + escapeHtml(q.prompt_cn || q.prompt_en || '') + '</span></div>' +
+        '<div class="q-imgs">';
+      ORDER.forEach(function (model) {
+        var src = q.images[model];
+        if (!src) return;
+        html += '<div class="q-img"><span class="chip ' + model + '">' + model + '</span>' +
+          '<img src="' + thumbOf(src) + '" data-full="' + src + '" alt="' + id + ' ' + model +
+          '" loading="lazy" decoding="async" class="loading"></div>';
+      });
+      html += '</div></div>';
+    });
+    gallery.innerHTML = html;
+    gallery.querySelectorAll('.q-img img').forEach(function (img) {
+      img.addEventListener('load', function () { img.classList.remove('loading'); img.classList.add('loaded'); });
+      img.addEventListener('click', function () {
+        lightboxImg.src = img.dataset.full;
+        var card = img.closest('.q-card');
+        var idEl = card ? card.querySelector('.q-id') : null;
+        var promptEl = card ? card.querySelector('.q-prompt') : null;
+        var chip = img.parentElement.querySelector('.chip');
+        lightboxMeta.innerHTML = '<div><b>' + (idEl ? idEl.textContent : '') + '</b>　·　' +
+          '<b>' + (chip ? chip.textContent : '') + '</b></div>' +
+          '<div style="margin-top:6px">' + (promptEl ? promptEl.textContent : '') + '</div>';
+        lightbox.classList.add('show');
+      });
+    });
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  document.getElementById('tabs').addEventListener('click', function (e) {
+    var btn = e.target.closest('button');
+    if (!btn || !manifest) return;
+    document.querySelectorAll('#tabs button').forEach(function (b) { b.classList.remove('on'); });
+    btn.classList.add('on');
+    render(btn.dataset.sec);
+  });
+
+  fetch('assets/manifest.json').then(function (r) { return r.json(); }).then(function (m) {
+    manifest = m;
+    render('portrait');
+  });
+})();
+</script>
+</body>
+</html>

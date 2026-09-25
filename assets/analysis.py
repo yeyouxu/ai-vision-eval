@@ -1,0 +1,148 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+
+# ==================== 1. 读取与清洗数据 ====================
+# 读取包含多级表头的评测数据，并将 N/A 转为空值
+path = '/kaggle/input/scores-data/scores_data.xlsx'
+xls_dict = pd.read_excel(path, sheet_name=None, header=[0, 1], na_values=['N/A'])
+all_long_dfs = []
+
+for sheet_name, df in xls_dict.items():
+    id_vars_df = df.iloc[:, 0:2].copy()
+    id_vars_df.columns = ['题目编号', '模型']
+    score_cols = df.columns[2:]
+
+    # 宽表转长表，方便后续聚合分析
+    melted = pd.melt(
+        pd.concat([id_vars_df, df[score_cols]], axis=1),
+        id_vars=['题目编号', '模型'], value_vars=score_cols,
+        var_name='原始维度', value_name='分数'
+    )
+    melted = melted.dropna(subset=['分数'])
+
+    # 根据表头结构自动拆分「准确度」与「美学质量」维度
+    def parse_dimension(col_tuple):
+        if isinstance(col_tuple, tuple):
+            if '准确度' in str(col_tuple[0]): return col_tuple[1], '准确度'
+            elif '美学质量' in str(col_tuple[0]): return col_tuple[1], '美学质量'
+            elif '覆盖维度' in str(col_tuple[0]): return col_tuple[1], '通用评分'
+            else: return str(col_tuple[1]), '未知类型'
+        return str(col_tuple), '未知类型'
+
+    melted['维度'] = melted['原始维度'].apply(lambda x: parse_dimension(x)[0])
+    melted['评分类型'] = melted['原始维度'].apply(lambda x: parse_dimension(x)[1])
+    melted['专项'] = sheet_name
+    all_long_dfs.append(melted[['专项', '题目编号', '模型', '维度', '评分类型', '分数']])
+
+final_long_df = pd.concat(all_long_dfs, ignore_index=True)
+final_long_df['分数'] = pd.to_numeric(final_long_df['分数'], errors='coerce')
+final_long_df = final_long_df.dropna(subset=['分数'])
+
+# 维度名称标准化映射
+dim_map = {
+    '指令遵循度': 'Instruction Adherence', '物理真实感': 'Physical Realism', '美学质量': 'Aesthetic Quality',
+    '风格一致性': 'Style Consistency', '文化合理性': 'Cultural Rationality',
+    '构图/视觉平衡': 'Composition/Balance', '层次感/空间深度': 'Depth/Spatial Layering',
+    '光线': 'Lighting', '影调': 'Tone', '色彩': 'Color', '细节自然度': 'Detail Naturalness',
+    '景深': 'Depth of Field', '专业风格契合度': 'Style Match',
+    '场景/元素/服装': 'Scene/Elements/Costume', '人物特征': 'Character Features',
+    '景别': 'Shot Type', '构图/机位': 'Composition/Camera Angle',
+    '自然光还原度': 'Natural Light Restoration', '视角/神态': 'Perspective/Expression',
+    '景深/虚化': 'Depth of Field/Bokeh',
+    '光影质量': 'Lighting Quality', '景深/虚化质量': 'DOF/Bokeh Quality',
+    '神态/叙事氛围': 'Expression/Narrative Vibe', '人物与环境融合度': 'Subject-Environment Integration',
+    '皮肤细节/身体结构自然度': 'Skin Details/Body Structure', '服装/造型美学': 'Costume/Styling Aesthetics',
+    '环境细节自然度': 'Environment Detail Naturalness', '动态/快门感': 'Dynamics/Shutter Feel'
+}
+final_long_df['维度_en'] = final_long_df['维度'].map(dim_map).fillna(final_long_df['维度'])
+
+# ==================== 2. 生成对比表格与图表 ====================
+model_order = ['Midjourney', 'Seedream', 'Kling']
+colors = ['#F5C842', '#7FD4D4', '#F4A6A6'] # 黄、青、红
+
+def draw_charts(special, score_type, col_order, title, is_accuracy=False):
+    data = final_long_df[(final_long_df['专项'] == special) & (final_long_df['评分类型'] == score_type)]
+    if data.empty: return
+
+    # 聚合数据
+    pivot_df = data.groupby(['模型', '维度_en'])['分数'].mean().unstack(level=1)
+    actual_cols = [c for c in col_order if c in pivot_df.columns]
+    pivot_df = pivot_df.reindex(index=model_order, columns=actual_cols)
+
+    # 清理索引名，确保表格干净
+    pivot_df.index.name = None
+    pivot_df.columns.name = None
+
+    if is_accuracy: pivot_df = pivot_df * 100
+
+    # 1. 打印表格
+    print(f"\n{'='*20} {title} - Table {'='*20}")
+    styler = pivot_df.style\
+        .set_properties(**{'text-align': 'center', 'padding': '8px'})\
+        .set_table_styles([
+            {'selector': 'table', 'props': [('border-collapse', 'collapse'), ('border', '2px solid black'), ('margin', 'auto')]},
+            {'selector': 'th', 'props': [('border', '1px solid #999'), ('text-align', 'center'), ('padding', '8px')]},
+            {'selector': 'td', 'props': [('border', '1px solid #999'), ('text-align', 'center'), ('padding', '8px')]}
+        ])
+
+    def format_val(x):
+        if isinstance(x, (int, float)) and not isinstance(x, bool):
+            return f"{x:.1f}%" if is_accuracy else f"{x:.2f}"
+        return x
+    display(styler.format(format_val))
+
+    # 2. 柱状图（保存为高清 PNG）
+    plt.figure(figsize=(12, 6))
+    ax = pivot_df.T.plot(kind='bar', figsize=(12, 6), color=colors)
+    ax.set_title(f'{title} - Bar Chart', fontsize=16)
+    ax.set_ylabel('Average Score (%)' if is_accuracy else 'Average Score', fontsize=12)
+    plt.xticks(rotation=45, ha='right', fontsize=10)
+    ax.legend(title='Model', fontsize=10, loc='upper left', bbox_to_anchor=(1, 1))
+    plt.tight_layout()
+    plt.savefig(f"/kaggle/working/{title}_bar.png", dpi=300, bbox_inches='tight')
+    plt.show()
+
+    # 3. 雷达图（保存为高清 PNG）
+    labels = pivot_df.columns.tolist()
+    angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False).tolist()
+    angles += angles[:1]
+
+    fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
+    for i, model in enumerate(model_order):
+        if model not in pivot_df.index: continue
+        values = pivot_df.loc[model].fillna(0).tolist()
+        values += values[:1]
+        ax.plot(angles, values, label=model, color=colors[i], linewidth=2)
+        ax.fill(angles, values, color=colors[i], alpha=0.1)
+
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(labels, fontsize=10,
+                       bbox=dict(facecolor='white', alpha=0.8, edgecolor='none', pad=1))
+
+    ax.tick_params(axis='y', labelsize=13, colors='gray')
+    ax.set_rlabel_position(45)
+
+    if is_accuracy: ax.set_ylim(0, 100)
+    plt.title(f'{title} - Radar Chart', fontsize=16, pad=30)
+    plt.legend(loc='upper right', bbox_to_anchor=(1.2, 1.1), fontsize=10)
+    plt.tight_layout()
+    plt.savefig(f"/kaggle/working/{title}_radar.png", dpi=300, bbox_inches='tight')
+    plt.show()
+
+# ==================== 3. 执行生成流程 ====================
+gen_cols = ['Instruction Adherence', 'Physical Realism', 'Aesthetic Quality', 'Style Consistency', 'Cultural Rationality']
+draw_charts('general', '通用评分', gen_cols, 'General', is_accuracy=False)
+
+land_acc_cols = ['Composition/Balance', 'Depth/Spatial Layering', 'Lighting', 'Tone', 'Color', 'Detail Naturalness', 'Depth of Field', 'Style Match', 'Cultural Rationality']
+draw_charts('landscape', '准确度', land_acc_cols, 'Landscape - Accuracy', is_accuracy=True)
+
+land_aes_cols = ['Composition/Balance', 'Depth/Spatial Layering', 'Lighting', 'Tone', 'Color', 'Detail Naturalness', 'Depth of Field']
+draw_charts('landscape', '美学质量', land_aes_cols, 'Landscape - Aesthetic', is_accuracy=False)
+
+port_acc_cols = ['Scene/Elements/Costume', 'Character Features', 'Shot Type', 'Composition/Camera Angle', 'Natural Light Restoration', 'Perspective/Expression', 'Depth of Field/Bokeh']
+draw_charts('portrait', '准确度', port_acc_cols, 'Portrait - Accuracy', is_accuracy=True)
+
+port_aes_cols = ['Composition/Camera Angle', 'Depth/Spatial Layering', 'Color', 'Lighting Quality', 'Tone', 'DOF/Bokeh Quality', 'Expression/Narrative Vibe', 'Subject-Environment Integration', 'Skin Details/Body Structure', 'Costume/Styling Aesthetics', 'Environment Detail Naturalness', 'Dynamics/Shutter Feel']
+draw_charts('portrait', '美学质量', port_aes_cols, 'Portrait - Aesthetic', is_accuracy=False)
