@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据迭代方案 · 文生图模型能力评测</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="report">
+
+<nav class="nav"><div class="nav-inner">
+  <a class="nav-brand" href="index.html">文生图模型能力评测<small>TEXT-TO-IMAGE MODEL EVALUATION</small></a>
+  <div class="nav-links">
+    <a href="index.html">首页</a>
+    <a href="report.html">评测报告</a>
+    <a href="questions.html">评测题库</a>
+    <a href="gallery.html">对比画廊</a>
+    <a href="data.html">数据附录</a>
+    <a href="iteration.html" class="active">迭代方案</a>
+    <a href="code.html">分析代码</a>
+  </div>
+</div></nav>
+
+<main class="wrap page">
+  <header style="margin-bottom:36px">
+    <div style="font-size:13px;letter-spacing:.14em;color:var(--ink-faint);margin-bottom:10px">DATA ITERATION PLAN · 2026.09.28</div>
+    <h1 style="font-size:30px;margin-bottom:10px">Seedream 5.0 Pro 人像专项数据迭代方案</h1>
+    <p style="color:var(--ink-soft);max-width:820px">
+      评测的下一步：从「诊断模型」走向「修复模型」。本方案以人像专项评测结果为诊断依据，
+      从数据运营视角设计标注策略、数据集构建流程与分阶段训练数据方案——
+      是评测报告「下一版改进方向」的落地执行文档。
+    </p>
+  </header>
+
+  <!-- 一、项目背景与目标 -->
+  <section class="section">
+    <h2 class="section-title">一、项目背景与目标</h2>
+    <h3 style="font-size:17px;color:var(--green);margin:18px 0 8px">1.1 项目背景</h3>
+    <p>基于文生图模型人像专项评测的 82 道标准化 Prompt、多维度准确度与美学质量评分结果，Seedream 5.0 Pro 呈现出「准确度领先、美学质感待补强」的鲜明能力画像：人像整体指令跟随能力为三模型最优，但在景别控制、自然光还原两项存在共性短板，同时服装造型、动态快门感等美学维度得分偏低，尚未形成显著的美学风格优势。</p>
+    <p>本方案从数据运营视角出发，以模型能力边界为依据，针对性设计标注策略、标注标准、数据集构建流程与分阶段训练数据方案，通过数据侧迭代实现「巩固准确度优势、补齐核心短板、拉升美学质感」的目标，适配世界模型多模态数据生产与迭代的完整工作链路。</p>
+
+    <h3 style="font-size:17px;color:var(--green);margin:22px 0 8px">1.2 核心迭代目标</h3>
+    <div class="find-list">
+      <div class="find-item"><div class="no">短期</div><div>
+        <h4>1—2 轮数据迭代 · 核心短板显著提升</h4>
+        <p>人像景别准确率 <b>62.1% → 75% 以上</b>，自然光还原度 <b>70.0% → 78% 以上</b>；保持人物特征、景深等维度的优异表现。</p>
+      </div></div>
+      <div class="find-item"><div class="no">中期</div><div>
+        <h4>3—4 轮迭代 · 美学短板有效补强</h4>
+        <p>服装造型美学 <b>3.93 → 4.5 分以上</b>，动态与快门感 <b>3.50 → 4.0 分以上</b>，实现「准确度第一梯队 + 美学中上无短板」的均衡定位。</p>
+      </div></div>
+      <div class="find-item"><div class="no">长期</div><div>
+        <h4>能力建设 · 落地可复用的数据飞轮</h4>
+        <p>形成「评测诊断 — 根因归因 — 标注迭代 — 质检管控 — 效果验证」的完整闭环，可复用到风景、通用场景等其他专项。</p>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- 二、能力画像与短板诊断 -->
+  <section class="section">
+    <h2 class="section-title">二、能力画像与短板诊断</h2>
+
+    <h3 style="font-size:17px;color:var(--green);margin:18px 0 8px">2.1 准确度维度诊断</h3>
+    <p>Seedream 5.0 Pro 整体指令跟随准确度在三模型中处于领先水平，但维度间性能分化明显：</p>
+    <div class="tbl-wrap"><table class="tbl">
+      <tr><th>分区</th><th>维度（得分）</th><th>判定</th></tr>
+      <tr><td><b style="color:#b4552d">核心短板区</b></td><td>景别（62.1%）、自然光还原度（70.0%）</td><td>显著低于其余维度，准确度层面最主要的失分点，<b>本次迭代重点攻坚方向</b></td></tr>
+      <tr><td><b style="color:var(--gold-deep,#a8843e)">良好稳定区</b></td><td>场景/元素/服装（93.3%）、构图/机位（89.7%）、视角/神态（90.0%）</td><td>指令跟随稳定，仅少量边界场景出错，具备进一步压缩错误率的空间</td></tr>
+      <tr><td><b style="color:var(--green)">饱和优势区</b></td><td>人物特征（100.0%）、景深/虚化（100.0%）</td><td>完全达标、无失分，只需维持基线、防止能力退化</td></tr>
+    </table></div>
+    <p style="color:var(--ink-soft);font-size:14px">横向对比 Midjourney V8.2、Kling Image 3.0：Seedream 5.0 Pro 在场景/元素/服装、构图/机位、视角/神态维度准确度领先；景别、自然光还原维度仍存在较大提升空间。</p>
+
+    <h3 style="font-size:17px;color:var(--green);margin:22px 0 8px">2.2 美学质量维度诊断</h3>
+    <p>美学维度呈现整体均衡、局部偏弱的特点：</p>
+    <div class="tbl-wrap"><table class="tbl">
+      <tr><th>分区</th><th>维度（得分）</th><th>判定</th></tr>
+      <tr><td><b style="color:#b4552d">核心短板区</b></td><td>服装/造型美学（3.93）、动态/快门感（3.50）</td><td>低于 4.0 分，三模型中下水平，<b>美学迭代的核心靶点</b></td></tr>
+      <tr><td><b style="color:var(--gold-deep,#a8843e)">良好稳定区</b></td><td>色彩（4.27）、光影质量（4.21）、层次感/空间深度（4.53）</td><td>4.0—4.6 区间，性能稳定，仍有小幅提升空间</td></tr>
+      <tr><td><b style="color:var(--green)">优势区</b></td><td>构图/机位（4.67）、神态/叙事氛围（4.63）、皮肤细节/身体结构自然度（4.63）、影调（4.83）、景深/虚化质量（4.93）、人物与环境融合度（4.90）、环境细节自然度（4.97）</td><td>＞4.6 分，三模型中上至顶尖水平</td></tr>
+    </table></div>
+  </section>
+
+  <!-- 2.3 迭代优先级 -->
+  <section class="section">
+    <h2 class="section-title">2.3 迭代优先级判定</h2>
+    <p class="section-desc">核心原则：先硬后软、先短板后优势；同一优先级内目标性质统一；每个优先级匹配对应的资源与迭代策略。</p>
+    <div class="tbl-wrap"><table class="tbl">
+      <tr><th>优先级</th><th>对应维度</th><th>核心目标</th><th>迭代策略</th></tr>
+      <tr>
+        <td><b>P1 · 准确度核心短板攻坚</b><br><span style="color:var(--ink-faint);font-size:13px">最高投入 · 专项突破</span></td>
+        <td>景别指令跟随、自然光还原（准确度核心短板）</td>
+        <td>快速拉升硬指标得分，解决「生成不对」的底层问题</td>
+        <td>样本配比专项倾斜（景别、光位）、新增强制标注字段、100% 人工全检、临界难例专项沉淀</td>
+      </tr>
+      <tr>
+        <td><b>P2 · 准确度良好维度定向补全</b><br><span style="color:var(--ink-faint);font-size:13px">次高投入 · 查漏补缺</span></td>
+        <td>场景/元素/服装、构图/机位、视角/神态（准确度良好稳定区）</td>
+        <td>巩固第二梯队能力，压缩边缘场景错误率，避免短板补上后强项回落</td>
+        <td>定向补充边界出错场景、半强制标注要求、50% 比例抽检</td>
+      </tr>
+      <tr>
+        <td><b>P3 · 美学核心短板专项优化</b><br><span style="color:var(--ink-faint);font-size:13px">中等投入 · 偏好对齐</span></td>
+        <td>服装/造型美感、动态/快门感（美学核心短板）</td>
+        <td>在准确度达标的基础上，补齐最明显的美学体验短板</td>
+        <td>新增美学维度标注字段、构建 RLHF 偏好排序数据集、仅使用准确度达标样本做美学训练</td>
+      </tr>
+      <tr>
+        <td><b>P4 · 通用维度基线维护与小幅优化</b><br><span style="color:var(--ink-faint);font-size:13px">低投入 · 控成本</span></td>
+        <td>① 美学良好稳定区：色彩、光影质量、层次感/空间深度<br>② 准确度饱和优势区：人物特征、景深/虚化</td>
+        <td>维持饱和维度能力不退化，小幅优化通用美学体验</td>
+        <td>维持基线样本占比、不新增强制标注、低比例抽检、控制数据成本</td>
+      </tr>
+      <tr>
+        <td><b>P5 · 美学优势维度基线维持</b><br><span style="color:var(--ink-faint);font-size:13px">最低投入 · 保现状</span></td>
+        <td>构图/机位、神态/叙事氛围、影调、景深/虚化、人物环境融合度、皮肤细节/身体结构自然度、环境细节自然度（美学优势区）</td>
+        <td>最小资源投入，保护已具备的美学优势，避免冗余数据投入</td>
+        <td>仅做基础样本更新，不做专项优化</td>
+      </tr>
+    </table></div>
+
+    <div class="callout"><b>迭代优先级与训练阶段映射：</b>SFT 阶段（有监督微调）覆盖 P1 / P2 / P4，聚焦所有准确度相关目标，完成硬指令能力修复与基线保护；RLHF 偏好对齐阶段覆盖 P3 / P4 / P5，<b>仅在 SFT 阶段核心准确度指标达标后启动</b>，优化美学短板，同时维持基线与优势能力。P3 的前置约束：必须在 P1 维度达标后再重点投入，避免「好看但不符合指令」。</div>
+  </section>
+
+  <!-- 后续章节 -->
+  <section class="section">
+    <h2 class="section-title">后续章节（待上传）</h2>
+    <p class="section-desc">以下章节正在完善，将随迭代推进陆续发布：</p>
+    <div class="find-list">
+      <div class="find-item"><div class="no">三</div><div><h4>配套标注标准规范</h4><p>各维度标注字段定义、合格/不合格样例、边界情形处理规则。</p></div></div>
+      <div class="find-item"><div class="no">四</div><div><h4>多模态数据集构建全流程</h4><p>从素材采集、清洗、标注到入库的完整生产链路。</p></div></div>
+      <div class="find-item"><div class="no">五</div><div><h4>SFT 与 RL 分阶段数据策略设计</h4><p>两个训练阶段的样本配比、数据格式与投喂节奏。</p></div></div>
+      <div class="find-item"><div class="no">六</div><div><h4>质量管控与效果验证</h4><p>标注质检机制、复测评测设计与效果对比口径。</p></div></div>
+      <div class="find-item"><div class="no">七</div><div><h4>落地节奏与阶段产出 · 预期收益</h4><p>各轮迭代的时间安排、交付物与预期指标变化。</p></div></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer"><div class="wrap">
+  <div class="row"><span>文生图模型能力评测 · 2026 年 9 月 · 评测人 L</span></div>
+</div></footer>
+
+</body>
+</html>
