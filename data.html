@@ -14,6 +14,7 @@
   <div class="nav-links">
     <a href="index.html">首页</a>
     <a href="report.html">评测报告</a>
+    <a href="questions.html">评测题库</a>
     <a href="gallery.html">对比画廊</a>
     <a href="data.html" class="active">数据附录</a>
     <a href="code.html">分析代码</a>
@@ -630,6 +631,7 @@
   /* 数值格式化：百分数保留1位小数，数值保留2位小数 */
   function fmtVal(v, kind) {
     var s = String(v == null ? '' : v).trim();
+    if (kind === 'frac') return s === '' ? '<span class="n-a">—</span>' : esc(s);
     var n = parseFloat(s);
     if (s === '' || isNaN(n)) return '<span class="n-a">—</span>';
     if (kind === 'pct') return (n * 100).toFixed(1) + '%';
@@ -695,12 +697,19 @@
     renderStats(rows, q, {
       tables: [
         { label: '一、准确度均分', kind: 'pct', dims: rowsSlice(rows, 4, 4, 1, 9)[0], data: rowsSlice(rows, 5, 7, 0, 9) },
-        { label: '二、美学质量均分', kind: 'num',
+        { label: '二、答对题目数 / 涉及题目数量', kind: 'frac',
+          dims: ['构图/视觉平衡', '层次感/空间深度', '光线', '影调', '色彩', '细节自然度', '景深', '专业风格契合度', '文化合理性'],
+          data: [
+            ['Midjourney V8.2', '9/10', '9/9', '12/13', '7/8', '8/8', '5/5', '4/4', '1/5', '6/6'],
+            ['Seedream 5.0 Pro', '10/10', '9/9', '13/13', '8/8', '8/8', '5/5', '4/4', '5/5', '6/6'],
+            ['Kling Image 3.0', '10/10', '9/9', '12/13', '7/8', '8/8', '3/5', '3/4', '5/5', '6/6']
+          ] },
+        { label: '三、美学质量均分', kind: 'num',
           dims: rowsSlice(rows, 4, 4, 12, 18)[0],
           data: rowsSlice(rows, 5, 7, 11, 11).map(function (m, i) { return m.concat(rowsSlice(rows, 5 + i, 5 + i, 12, 18)[0]); }) }
       ],
       chartGroups: [{
-        label: '三、各维度均分对比（柱状图、雷达图）',
+        label: '四、各维度均分对比（柱状图、雷达图）',
         sets: [
           { name: '准确度', imgs: [{ file: 'Landscape - Accuracy_bar.webp', cap: '柱状图' }, { file: 'Landscape - Accuracy_radar.webp', cap: '雷达图' }] },
           { name: '美学质量', imgs: [{ file: 'Landscape - Aesthetic_bar.webp', cap: '柱状图' }, { file: 'Landscape - Aesthetic_radar.webp', cap: '雷达图' }] }
@@ -713,12 +722,19 @@
     renderStats(rows, q, {
       tables: [
         { label: '一、准确度均分', kind: 'pct', dims: rowsSlice(rows, 3, 3, 1, 7)[0], data: rowsSlice(rows, 4, 6, 0, 7) },
-        { label: '二、美学质量均分', kind: 'num',
+        { label: '二、答对题目数 / 涉及题目数量', kind: 'frac',
+          dims: ['场景/元素/服装', '人物特征', '景别', '构图/机位', '自然光还原度', '视角/神态', '景深/虚化'],
+          data: [
+            ['Midjourney V8.2', '26/30', '30/30', '14/29', '22/29', '20/30', '20/30', '16/16'],
+            ['Seedream 5.0 Pro', '28/30', '30/30', '18/29', '26/29', '21/30', '27/30', '16/16'],
+            ['Kling Image 3.0', '27/30', '30/30', '17/29', '25/29', '20/30', '24/30', '16/16']
+          ] },
+        { label: '三、美学质量均分', kind: 'num',
           dims: rowsSlice(rows, 3, 3, 10, 21)[0],
           data: rowsSlice(rows, 4, 6, 9, 9).map(function (m, i) { return m.concat(rowsSlice(rows, 4 + i, 4 + i, 10, 21)[0]); }) }
       ],
       chartGroups: [{
-        label: '三、各维度均分对比（柱状图、雷达图）',
+        label: '四、各维度均分对比（柱状图、雷达图）',
         sets: [
           { name: '准确度', imgs: [{ file: 'Portrait - Accuracy_bar.webp', cap: '柱状图' }, { file: 'Portrait - Accuracy_radar.webp', cap: '雷达图' }] },
           { name: '美学质量', imgs: [{ file: 'Portrait - Aesthetic_bar.webp', cap: '柱状图' }, { file: 'Portrait - Aesthetic_radar.webp', cap: '雷达图' }] }

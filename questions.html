@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>评测题库 · 文生图模型能力评测</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="gallery">
+
+<nav class="nav"><div class="nav-inner">
+  <a class="nav-brand" href="index.html">文生图模型能力评测<small>TEXT-TO-IMAGE MODEL EVALUATION</small></a>
+  <div class="nav-links">
+    <a href="index.html">首页</a>
+    <a href="report.html">评测报告</a>
+    <a href="questions.html" class="active">评测题库</a>
+    <a href="gallery.html">对比画廊</a>
+    <a href="data.html">数据附录</a>
+    <a href="code.html">分析代码</a>
+  </div>
+</div></nav>
+
+<main class="wrap page">
+  <h1 style="font-size:30px;margin-bottom:8px">评测题库</h1>
+  <p style="color:var(--ink-soft);max-width:760px;margin-bottom:28px">
+    三个专项的完整题库：通用能力 25 题（先导研究，原子能力 → 组合能力 → 综合压力三层递进）、
+    风景美学 27 题、叙事感女性人像美学 30 题（正式研究）。
+    每题含中文与英文提示词——Seedream 与 Kling 使用中文提示词，Midjourney 使用英文提示词。
+  </p>
+
+  <div class="gallery-tabs" id="tabs">
+    <button data-sec="general">通用能力 · 先导研究（25 题）</button>
+    <button data-sec="landscape">风景美学 · 正式研究（27 题）</button>
+    <button data-sec="portrait" class="on">叙事感女性人像 · 正式研究（30 题）</button>
+  </div>
+
+  <div id="bank"></div>
+</main>
+
+<footer class="footer"><div class="wrap">
+  <div class="row"><span>文生图模型能力评测 · 2026 年 9 月 · 评测人 L</span></div>
+</div></footer>
+
+<script>
+(function () {
+  var FILES = {
+    general: 'data/A-1-2 通用——题库.json',
+    landscape: 'data/A-2-2 风景——题库.json',
+    portrait: 'data/A-3-2 人像——题库.json'
+  };
+  var bank = document.getElementById('bank');
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function cell(r, i) { return (r[i] == null ? '' : String(r[i])).trim(); }
+
+  function render(sec, rows) {
+    var isGen = sec === 'general';
+    var w = isGen ? [56, 68, 110, 430, 430] : [68, 130, 450, 450];
+    var t = '<colgroup>' + w.map(function (px) { return '<col style="width:' + px + 'px">'; }).join('') + '</colgroup>';
+    t += '<thead><tr>' + (isGen ? '<th>层级</th>' : '') +
+      '<th>编号</th><th>测试点</th><th>中文提示词</th><th>英文提示词</th></tr></thead><tbody>';
+    var off = isGen ? 1 : 0;   // 通用表多一列层级，后续列整体右移
+    rows.forEach(function (r) {
+      if (!/^[GLP]-/.test(cell(r, 0 + off))) return;   // 只保留编号行（跳过标题、表头、空行）
+      t += '<tr>' +
+        (isGen ? '<td class="id">' + esc(cell(r, 0)) + '</td>' : '') +
+        '<td class="id">' + esc(cell(r, 0 + off)) + '</td>' +
+        '<td>' + esc(cell(r, 1 + off)) + '</td>' +
+        '<td class="long">' + esc(cell(r, 2 + off)) + '</td>' +
+        '<td class="long">' + esc(cell(r, 3 + off)) + '</td></tr>';
+    });
+    t += '</tbody>';
+    var total = w.reduce(function (a, b) { return a + b; }, 0);
+    bank.innerHTML = '<div class="tbl-wrap a11-first"><table class="tbl fit" style="width:' + total + 'px;min-width:' + total + 'px">' + t + '</table></div>';
+  }
+
+  function load(sec) {
+    fetch(FILES[sec]).then(function (r) { return r.json(); }).then(function (rows) { render(sec, rows); });
+  }
+
+  document.querySelectorAll('#tabs button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('#tabs button').forEach(function (x) { x.classList.remove('on'); });
+      b.classList.add('on');
+      load(b.dataset.sec);
+    });
+  });
+
+  load('portrait');   // 默认打开人像题库
+})();
+</script>
+</body>
+</html>
