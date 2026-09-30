@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>文生图模型能力评测 · Midjourney / Seedream / Kling 两维度正式评测</title>
+<title>文生图评测与数据迭代 · Midjourney / Seedream / Kling 两维度正式评测</title>
 <meta name="description" content="以 Midjourney、Seedream、Kling 三个主流模型为对象，通过 82 道跨场景题目，从风景美学、叙事感女性人像美学两个正式维度系统评测文生图模型的能力边界。">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="assets/style.css">
@@ -11,24 +11,25 @@
 <body data-page="index">
 
 <nav class="nav"><div class="nav-inner">
-  <a class="nav-brand" href="index.html">文生图模型能力评测<small>TEXT-TO-IMAGE MODEL EVALUATION</small></a>
+  <a class="nav-brand" href="index.html">文生图评测与数据迭代<small>T2I EVALUATION & DATA ITERATION</small></a>
   <div class="nav-links">
     <a href="index.html" class="active">首页</a>
     <a href="report.html">评测报告</a>
-    <a href="questions.html">评测题库</a>
+    <a href="iteration.html">迭代方案（Seedream）</a>
     <a href="gallery.html">对比画廊</a>
-    <a href="data.html">数据附录</a>
-    <a href="iteration.html">迭代方案</a>
-    <a href="code.html">分析代码</a>
+    <span class="nav-sep"></span>
+    <a href="questions.html">评测题库</a>
+    <a href="data.html">评测数据附录</a>
+    <a href="code.html">评测分析代码</a>
   </div>
 </div></nav>
 
 <header class="hero"><div class="wrap">
-  <div class="hero-eyebrow">Model Evaluation · 2026.09</div>
+  <div class="hero-eyebrow">Model Evaluation & Data Iteration · 2026.09</div>
   <h1>当模型从「生成正确」<br>走向「生成真实与美」</h1>
   <p class="sub">以 Midjourney V8.2 / Seedream 5.0 Pro / Kling Image 3.0 为对象，通过 82 道跨场景题目，
-    从<strong>风景美学、叙事感女性人像美学</strong>两个正式维度，系统性刻画当前文生图模型的能力边界。
-    另设「通用能力」先导研究用于验证评测方法（详见报告第三章）。</p>
+    从<strong>风景美学、叙事感女性人像美学</strong>两个正式维度，系统性刻画当前文生图模型的能力边界——
+    并基于诊断结果输出 <strong>Seedream 人像专项数据迭代方案</strong>，形成「评测诊断 → 数据迭代」的完整闭环。</p>
   <div class="hero-meta">
     <span><b>评测对象</b> Midjourney · Seedream · Kling</span>
     <span><b>题目规模</b> 82 题 / 2 个正式专项 + 1 个方法论验证</span>
@@ -36,10 +37,11 @@
     <span><b>评测人</b> L</span>
   </div>
   <div class="hero-actions">
-    <a class="btn btn-primary" href="report.html">阅读完整评测报告</a>
+    <a class="btn btn-primary" href="report.html">阅读完整三模型评测报告</a>
     <a class="btn btn-ghost" href="gallery.html">看模型对比画廊</a>
     <a class="btn btn-ghost" href="assets/文生图模型能力评测报告-详细版.pdf">下载评测报告 PDF</a>
   </div>
+  <p style="margin-top:16px"><a class="btn btn-accent" href="iteration.html">阅读 Seedream 数据迭代方案 →</a></p>
 </div></header>
 
 <main class="wrap page">
@@ -76,9 +78,7 @@
         <h3>Seedream <span style="font-size:14px;color:var(--ink-faint)">5.0 Pro</span></h3>
         <div class="ver">字节跳动 · 网页版 · 2K 输出</div>
         <span class="tag">均衡 · 可靠</span>
-        <p>当前三个模型中最接近「技术正确」的一个：准确执行能��最强，
-          风景九个准确度维度零失败，美学表现中上、无明显短板；
-          但尚未形成显著的美学风格优势，人像服装造型美感偏弱。</p>
+        <p>当前三个模型中最接近「技术正确」的一个：准确执行能力为最强，美学表现中上、无明显短板；但尚未形成显著的美学风格优势，人像服装造型美感偏弱。</p>
         <div class="kv">
           <span><b>最强项</b> 准确度（风景全维度 100% 执行成功）</span>
           <span><b>最弱项</b> 服装与造型美学（3.93）、动态与快门感（3.50）</span>
@@ -151,11 +151,46 @@
     </div>
   </section>
 
+  <!-- 从评测到迭代 -->
+  <section class="section">
+    <h2 class="section-title">从评测到迭代：诊断之后，开出处方</h2>
+    <p class="section-desc">评测的终点不是排名，而是可执行的数据方案。基于 Seedream 5.0 Pro 人像专项的短板诊断，
+      输出 P1—P5 五级迭代优先级、SFT / RLHF 分阶段数据策略，以及可复用到其他专项的「评测诊断 — 标注迭代 — 效果验证」数据飞轮。</p>
+    <div class="goal-bars">
+      <div class="goal-bar-row">
+        <span class="goal-name">景别准确率<small>短期 1—2 轮</small></span>
+        <div class="goal-track"><div class="goal-fill" style="width:62.1%"></div><div class="goal-target" style="left:75%"></div></div>
+        <span class="goal-vals">62.1% → <b>75%+</b></span>
+      </div>
+      <div class="goal-bar-row">
+        <span class="goal-name">自然光还原度<small>短期 1—2 轮</small></span>
+        <div class="goal-track"><div class="goal-fill" style="width:70%"></div><div class="goal-target" style="left:78%"></div></div>
+        <span class="goal-vals">70.0% → <b>78%+</b></span>
+      </div>
+      <div class="goal-bar-row">
+        <span class="goal-name">服装/造型美学<small>中期 3—4 轮</small></span>
+        <div class="goal-track"><div class="goal-fill" style="width:78.6%"></div><div class="goal-target" style="left:90%"></div></div>
+        <span class="goal-vals">3.93 → <b>4.5+</b></span>
+      </div>
+      <div class="goal-bar-row">
+        <span class="goal-name">动态/快门感<small>中期 3—4 轮</small></span>
+        <div class="goal-track"><div class="goal-fill" style="width:70%"></div><div class="goal-target" style="left:80%"></div></div>
+        <span class="goal-vals">3.50 → <b>4.0+</b></span>
+      </div>
+    </div>
+    <p style="margin-top:18px"><a class="btn btn-primary" href="iteration.html">查看完整数据迭代方案</a></p>
+  </section>
+
   <!-- 入口 -->
   <section class="section">
     <h2 class="section-title">深入这个项目</h2>
-    <p class="section-desc">报告全文、逐题评分数据、三模型同题对比图、统计分析代码，全部开放。</p>
+    <p class="section-desc">报告全文、迭代方案、逐题评分数据、三模型同题对比图、统计分析代码，全部开放。</p>
     <div class="entry-grid">
+      <a class="entry-card" href="iteration.html">
+        <div class="icon">🎯</div>
+        <h4>数据迭代方案</h4>
+        <p>从诊断到处方：P1—P5 迭代优先级、标注策略、SFT / RLHF 分阶段数据方案与数据飞轮。</p>
+      </a>
       <a class="entry-card" href="report.html">
         <div class="icon">📄</div>
         <h4>评测报告</h4>
@@ -164,16 +199,16 @@
       <a class="entry-card" href="gallery.html">
         <div class="icon">🖼️</div>
         <h4>对比画廊</h4>
-        <p>报告典型 Bad Case 归因的 9 道精选题：同一提示词下 Midjourney / Seedream / Kling 三模型并排对比。</p>
+        <p>82 道题、249 张生成图：同一提示词下 Midjourney / Seedream / Kling 三模型并排对比。</p>
       </a>
       <a class="entry-card" href="data.html">
         <div class="icon">📊</div>
-        <h4>数据附录</h4>
+        <h4>评测数据附录</h4>
         <p>评测方法、完整题库、逐题评分与 Bad Case 记录、均分统计——附录 1-1 至 3-4 全部表格。</p>
       </a>
       <a class="entry-card" href="code.html">
         <div class="icon">💻</div>
-        <h4>分析代码</h4>
+        <h4>评测分析代码</h4>
         <p>Python / pandas 数据清洗与统计、matplotlib 可视化：从原始评分表到图表的完整流程。</p>
       </a>
     </div>
@@ -183,7 +218,7 @@
 
 <footer class="footer"><div class="wrap">
   <div class="row">
-    <span>文生图模型能力评测 · 2026 年 9 月 · 评测人 L</span>
+    <span>文生图评测与数据迭代 · 2026 年 9 月 · 评测人 L</span>
   </div>
   <div class="row">
     <a href="assets/文生图模型能力评测报告-详细版.pdf">下载详细版 PDF</a>

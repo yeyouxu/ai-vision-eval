@@ -3,37 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>对比画廊 · 文生图模型能力评测</title>
+<title>对比画廊 · 文生图评测与数据迭代</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body data-page="gallery">
 
 <nav class="nav"><div class="nav-inner">
-  <a class="nav-brand" href="index.html">文生图模型能力评测<small>TEXT-TO-IMAGE MODEL EVALUATION</small></a>
+  <a class="nav-brand" href="index.html">文生图评测与数据迭代<small>T2I EVALUATION & DATA ITERATION</small></a>
   <div class="nav-links">
     <a href="index.html">首页</a>
     <a href="report.html">评测报告</a>
-    <a href="questions.html">评测题库</a>
+    <a href="iteration.html">迭代方案（Seedream）</a>
     <a href="gallery.html" class="active">对比画廊</a>
-    <a href="data.html">数据附录</a>
-    <a href="iteration.html">迭代方案</a>
-    <a href="code.html">分析代码</a>
+    <span class="nav-sep"></span>
+    <a href="questions.html">评测题库</a>
+    <a href="data.html">评测数据附录</a>
+    <a href="code.html">评测分析代码</a>
   </div>
 </div></nav>
 
 <main class="wrap page">
   <h1 style="font-size:30px;margin-bottom:8px">对比画廊</h1>
   <p style="color:var(--ink-soft);max-width:760px;margin-bottom:28px">
-    精选展示评测报告中「典型 Bad Case 归因」的 9 道题目（每专项 3 道）。同一提示词下，Midjourney / Seedream / Kling 三模型并排对比——
-    Seedream 与 Kling 使用中文提示词，Midjourney 使用英文提示词；各模型生成多张后选最优一张进入评分（16:9 画幅）。
-    点击图片可放大。
+    82 道题、830 张生成图、249 张对比图。同一提示词下，Midjourney V8.2 / Seedream 5.0 Pro / Kling Image 3.0 三模型并排对比——
+    Seedream 5.0 Pro 与 Kling Image 3.0 使用中文提示词，Midjourney V8.2 使用英文提示词；各模型生成多张后选最优一张进入评分（16:9 画幅）。
+    点击图片可放大。展示为每题进入评分的最优样本，全量 830 张生成图见仓库。
   </p>
 
   <div class="gallery-tabs" id="tabs">
-    <button data-sec="general">通用能力 · 先导研究</button>
-    <button data-sec="landscape">风景美学 · 正式研究</button>
-    <button data-sec="portrait" class="on">叙事感女性人像 · 正式研究</button>
+    <button data-sec="general">通用能力 · 先导研究（25 题，含 12A/12B）</button>
+    <button data-sec="landscape">风景美学 · 正式研究（27 题）</button>
+    <button data-sec="portrait" class="on">叙事感女性人像 · 正式研究（30 题）</button>
   </div>
 
   <div id="gallery"></div>
@@ -46,12 +47,17 @@
 </div>
 
 <footer class="footer"><div class="wrap">
-  <div class="row"><span>文生图模型能力评测 · 2026 年 9 月 · 评测人 L</span></div>
+  <div class="row"><span>文生图评测与数据迭代 · 2026 年 9 月 · 评测人 L</span></div>
 </div></footer>
 
 <script>
 (function () {
-  var ORDER = ['Midjourney', 'Seedream', 'Kling'];
+  // key 用于读 manifest / 取色类，name 为左上角显示的全称
+  var MODELS = [
+    { key: 'Midjourney', name: 'Midjourney V8.2' },
+    { key: 'Seedream', name: 'Seedream 5.0 Pro' },
+    { key: 'Kling', name: 'Kling Image 3.0' }
+  ];
   var SEC_NAME = { general: 'G', landscape: 'L', portrait: 'P' };
   var gallery = document.getElementById('gallery');
   var lightbox = document.getElementById('lightbox');
@@ -80,19 +86,9 @@
   // 把 manifest 里的 src 拆成 thumb 与 full 两份
   function thumbOf(src) { return src.replace('/img/', '/img/thumb/'); }
 
-  /* 画廊只展示报告「典型 Bad Case 归因」举例的题（每专项 3 道）；manifest 单数字题号不补零，统一归一化比较 */
-  var KEEP = {
-    general: ['G-13', 'G-14', 'G-23'],
-    landscape: ['L-1', 'L-5', 'L-6'],
-    portrait: ['P-8', 'P-14', 'P-30']
-  };
-
   function render(sec) {
     var qs = manifest[sec];
-    var ids = Object.keys(qs).filter(function (id) {
-      var keep = KEEP[sec];
-      return !keep || keep.indexOf(id) !== -1;
-    }).sort(function (a, b) { return qNum(a) - qNum(b); });
+    var ids = Object.keys(qs).sort(function (a, b) { return qNum(a) - qNum(b); });
     var html = '';
     ids.forEach(function (id) {
       var q = qs[id];
@@ -100,10 +96,11 @@
         '<span class="q-id">' + id + '</span>' +
         '<span class="q-prompt">' + escapeHtml(q.prompt_cn || q.prompt_en || '') + '</span></div>' +
         '<div class="q-imgs">';
-      ORDER.forEach(function (model) {
+      MODELS.forEach(function (m) {
+        var model = m.key;
         var src = q.images[model];
         if (!src) return;
-        html += '<div class="q-img"><span class="chip ' + model + '">' + model + '</span>' +
+        html += '<div class="q-img"><span class="chip ' + model + '">' + m.name + '</span>' +
           '<img src="' + thumbOf(src) + '" data-full="' + src + '" alt="' + id + ' ' + model +
           '" loading="lazy" decoding="async" class="loading"></div>';
       });
